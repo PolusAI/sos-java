@@ -18,7 +18,7 @@ def stitch_cell_output(response):
     return ''.join([stream[1]['text'] for stream in response ])
 
 class sos_java:
-    background_color = {'Java': '#00758F'}
+    background_color = {'Java': '#F80000'}
     supported_kernels = {'Java': ['java']}
     options = {}
     cd_command = ''
@@ -26,7 +26,7 @@ class sos_java:
     def __init__(self, sos_kernel, kernel_name='Java'):
         self.sos_kernel = sos_kernel
         self.kernel_name = kernel_name
-        self.init_statements = cpp_init_statements
+        self.init_statements = ''
 
     def insistent_get_response(self, command, stream):
         response = self.sos_kernel.get_response(command, stream)
