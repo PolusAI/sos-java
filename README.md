@@ -9,9 +9,8 @@ Scalar (primitive) types
 
 | Source: SoS (Python) type                                                       | Destination: Java primitive type       |
 |---------------------------------------------------------------------------------|----------------------------------------|
-| `int` `long int` `np.intc` `np.intp` `np.int8` `np.int16` `np.int32` `np.int64` |                                        |
-| `float` `np.float16` `np.float32` `np.float64`                                  |                                        |
-| `np.longdouble`                                                                 |                                        |
-| `str`                                                                           |                                        |
-| `bool`                                                                          |                                        |
+| `int` `long int` `np.intc` `np.intp` `np.int8` `np.int16` `np.int32` `np.int64` |  `int` `long` (depending on value)     |
+| `float` `np.float16` `np.float32` `np.float64`                                  |  `float` `double` (depending on value) |
+| `str`                                                                           |  `String`                              |
+| `bool`                                                                          |  `boolean`                             |
 
