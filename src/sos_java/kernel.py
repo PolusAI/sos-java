@@ -14,25 +14,35 @@ from IPython.core.error import UsageError
 import re
 import sys
 
+def homogeneous_type(seq):
+    iseq = iter(seq)
+    first_type = type(next(iseq))
+    if first_type in (int, float):
+        return True if all(isinstance(x, (int, float)) for x in iseq) else False
+    else:
+        return True if all(isinstance(x, first_type) for x in iseq) else False
+
+java_init_statements = f'%jars {os.path.dirname(os.path.realpath(__file__))}/sos.helper.jar\nimport sos.helper;'
+
 def stitch_cell_output(response):
     return ''.join([stream[1]['text'] for stream in response ])
 
 def _sos_to_java_type(obj):
-    ''' Returns corresponding C++ data type string for provided Python object '''
+    ''' Returns corresponding Java data type string for provided Python object '''
     if isinstance(obj, (int, np.intc, np.intp, np.int8, np.int16, np.int32, np.int64, bool, np.bool_)):
         if isinstance(obj, (bool, np.bool_)):
-            return 'boolean', 'true' if obj==True else 'false'
+            return 'Boolean', 'true' if obj==True else 'false'
         elif obj >= -2147483648 and obj <= 2147483647:
-            return 'int', repr(obj)
+            return 'Integer', repr(obj)
         elif obj >= -9223372036854775808 and obj <= 9223372036854775807:
-            return 'long', repr(obj)+'L'
+            return 'Long', repr(obj)+'L'
         else:
             return -1, None #Integer is out of bounds
     elif isinstance(obj, (float, np.float16, np.float32, np.float64)):
         if (obj >= -3.40282e+38 and obj <= -1.17549e-38) or (obj >= 1.17549e-38 and obj <= 3.40282e+38):
-            return 'float', repr(obj)+'f'
+            return 'Float', repr(obj)+'f'
         elif (obj >= -1.79769e+308 and obj <= -2.22507e-308) or (obj >= 2.22507e-308 and obj <= 1.79769e+308):
-            return 'double', repr(obj)
+            return 'Double', repr(obj)
         else:
             return -1, None
     elif isinstance(obj, str):
@@ -50,7 +60,7 @@ class sos_java:
     def __init__(self, sos_kernel, kernel_name='Java'):
         self.sos_kernel = sos_kernel
         self.kernel_name = kernel_name
-        self.init_statements = ''
+        self.init_statements = java_init_statements
 
     def insistent_get_response(self, command, stream):
         response = self.sos_kernel.get_response(command, stream)
@@ -70,7 +80,18 @@ class sos_java:
                 return None
         elif isinstance(obj, (Sequence, np.ndarray, dict, pd.core.frame.DataFrame)):
             #do vector things
-            return ''
+            if len(obj) == 0:
+                #TODO: how to deal with an empty array?
+                return ''
+            else:
+                #convert Python dict to Java Map
+                if isinstance(obj, dict): 
+                    keys = obj.keys()
+                    values = obj.values()
+                    if homogeneous_type(keys) and homogeneous_type(values):
+                        dict_value = '; '.join([f'{name}.put({ _sos_to_java_type(d[0])[1] }, { _sos_to_java_type(d[1])[1] })' for d in obj.items()])
+                        return f'Map<{_sos_to_java_type(next(iter(keys)))[0]}, {_sos_to_java_type(next(iter(values)))[0]}> {name} = new HashMap<>(); {dict_value}'
+
         else:
             #unsupported type
             return None
@@ -89,5 +110,5 @@ class sos_java:
         result = {}
         for name in names:
             # name - string with variable name (in Java)
-            cpp_type = self.insistent_get_response(f'{name}', ('execute_result',))[0][1]['data']['text/plain']
+            java_type = self.insistent_get_response(f'{name}', ('execute_result',))[0][1]['data']['text/plain']
         return result
