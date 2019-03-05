@@ -5,6 +5,8 @@ This language extension to SoS allows to use Java with IJava Jupyter kernel (htt
 
 ### Supported variable types for transfer
 
+#### From SoS to Java (`%get` magic):
+
 Scalar (primitive) types
 
 | Source: SoS (Python) type                                                       | Destination: Java primitive type       |
@@ -14,3 +16,13 @@ Scalar (primitive) types
 | `str`                                                                           |  `String`                              |
 | `bool`                                                                          |  `boolean`                             |
 
+#### From Java to SoS (`%put` magic):
+
+Scalar types
+
+| Source: Java type                            | Destination: SoS (Python) type |
+|----------------------------------------------|--------------------------------|
+| `byte` `short` `int` `long`                  | `int`                          |
+| `float` `double`                             | `float`                        |
+| `char` `String`                              | `str`                          |
+| `boolean`                                    | `bool`                         |

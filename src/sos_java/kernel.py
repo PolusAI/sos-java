@@ -51,6 +51,26 @@ def _sos_to_java_type(obj):
     else:
         return -1, None
 
+def _java_scalar_to_sos(java_type, value):
+    #Convert string value to appropriate type in SoS
+    integer_types = ['byte', 'int', 'short', 'long']
+    real_types = ['float', 'double']
+    if java_type in integer_types:
+        return int(value)
+    elif java_type in real_types:
+        if value[-1] == 'f':
+            value = value[:-1]
+        return float(value)
+    elif java_type == 'char':
+        return value
+    elif java_type == 'string':
+        return value
+    elif java_type == 'boolean':
+        if value == 'true':
+            return True
+        else:
+            return False
+
 class sos_java:
     background_color = {'Java': '#F80000'}
     supported_kernels = {'Java': ['java']}
@@ -110,5 +130,12 @@ class sos_java:
         result = {}
         for name in names:
             # name - string with variable name (in Java)
-            java_type = self.insistent_get_response(f'{name}', ('execute_result',))[0][1]['data']['text/plain']
+            # self.sos_kernel.warn(name)
+            java_type = self.sos_kernel.get_response(f'helper.getType({name})', ('execute_result',))[0][1]['data']['text/plain']
+            # self.sos_kernel.warn(java_type)
+            
+            if java_type in ('boolean', 'char', 'byte', 'short', 'int', 'long', 'float', 'double', 'string'):
+                #do scalar conversion
+                value = self.sos_kernel.get_response(f'System.out.println({name});', ('stream',))[0][1]['text']
+                result[name] = _java_scalar_to_sos(java_type, value)
         return result
