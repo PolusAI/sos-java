@@ -6,7 +6,8 @@
 import os
 import numpy as np
 import pandas as pd
-from tempfile import TemporaryDirectory
+import csv
+import tempfile
 from textwrap import dedent
 from sos.utils import short_repr, env
 from collections import Sequence
@@ -22,7 +23,18 @@ def homogeneous_type(seq):
     else:
         return True if all(isinstance(x, first_type) for x in iseq) else False
 
-java_init_statements = f'%jars {os.path.dirname(os.path.realpath(__file__))}/sos.helper.jar\nimport sos.helper;'
+java_init_statements = f'''
+%jars {os.path.dirname(os.path.realpath(__file__))}/sos.helper.jar\n
+import sos.helper;\n
+%maven tech.tablesaw:tablesaw-beakerx:0.30.3\n
+%maven com.jimmoores:quandl-tablesaw:2.0.0\n
+%maven com.github.haifengl:smile-core:1.5.2\n
+import static tech.tablesaw.aggregate.AggregateFunctions.*;\n
+import tech.tablesaw.api.*;\n
+import tech.tablesaw.columns.*;\n
+import smile.clustering.*;\n
+import smile.regression.*;\n
+'''
 
 def stitch_cell_output(response):
     return ''.join([stream[1]['text'] for stream in response ])
@@ -111,6 +123,18 @@ class sos_java:
                     if homogeneous_type(keys) and homogeneous_type(values):
                         dict_value = '; '.join([f'{name}.put({ _sos_to_java_type(d[0])[1] }, { _sos_to_java_type(d[1])[1] })' for d in obj.items()])
                         return f'Map<{_sos_to_java_type(next(iter(keys)))[0]}, {_sos_to_java_type(next(iter(values)))[0]}> {name} = new HashMap<>(); {dict_value}'
+                elif isinstance(obj, Sequence):
+                    if homogeneous_type(obj):
+                        seq_value = ', '.join([_sos_to_java_type(s)[1] for s in obj])
+                        el_type = _sos_to_java_type(next(iter(obj)))[0]
+                        return f'ArrayList<{el_type}> {name} = new ArrayList<{el_type}>(Arrays.asList({seq_value}));'
+                    else:
+                        return None
+                elif isinstance(obj, pd.core.frame.DataFrame):
+                    dic = tempfile.tempdir
+                    os.chdir(dic)
+                    obj.to_csv('df2java.csv', index=False, quoting=csv.QUOTE_NONNUMERIC, quotechar='"')
+                    return f'var {name} = Table.read().csv("{dic}/df2java.csv");'
 
         else:
             #unsupported type
