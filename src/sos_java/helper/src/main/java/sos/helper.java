@@ -1,8 +1,18 @@
 package sos;
 
 import java.util.Map;
+import java.util.ArrayList;
+import static tech.tablesaw.aggregate.AggregateFunctions.*;
+import tech.tablesaw.api.*;
+import tech.tablesaw.columns.*;
 
-public class helper{  
+/**
+ * Helper class for SoS notebooks
+ * getType(var) returns variable type through polymorhism
+ *
+ */
+public class helper 
+{
     public static String getType(Boolean x) {
         return "boolean";
     }
@@ -31,6 +41,12 @@ public class helper{
         return "string";
     }
     public static String getType(Map x) {
-       return "map";
+        return "map";
+    }
+    public static String getType(ArrayList x) {
+        return "array";
+    }
+    public static String getType(Table x) {
+        return "table";
     }
 }

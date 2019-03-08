@@ -24,16 +24,13 @@ def homogeneous_type(seq):
         return True if all(isinstance(x, first_type) for x in iseq) else False
 
 java_init_statements = f'''
-%jars {os.path.dirname(os.path.realpath(__file__))}/sos.helper.jar\n
-import sos.helper;\n
+%jars {os.path.dirname(os.path.realpath(__file__))}/helper.jar\n
 %maven tech.tablesaw:tablesaw-beakerx:0.30.3\n
 %maven com.jimmoores:quandl-tablesaw:2.0.0\n
-%maven com.github.haifengl:smile-core:1.5.2\n
 import static tech.tablesaw.aggregate.AggregateFunctions.*;\n
 import tech.tablesaw.api.*;\n
 import tech.tablesaw.columns.*;\n
-import smile.clustering.*;\n
-import smile.regression.*;\n
+import sos.helper
 '''
 
 def stitch_cell_output(response):
