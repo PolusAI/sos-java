@@ -159,6 +159,10 @@ class sos_java:
                 #do scalar conversion
                 value = self.sos_kernel.get_response(f'System.out.println({name});', ('stream',))[0][1]['text']
                 result[name] = _java_scalar_to_sos(java_type, value)
+            elif java_type == 'array':
+                flat_list = '[' + self.sos_kernel.get_response(f'System.out.println(helper.printArray({name}))', ('stream',))[0][1]['text'] + ']'
+                el_type = self.insistent_get_response(f'helper.getType({name}.get(0))', ('execute_result',))[0][1]['data']['text/plain']
+                result[name] = np.array([_java_scalar_to_sos(el_type, el) for el in eval(flat_list)])
             elif java_type == 'table':
                 dic = tempfile.tempdir
                 os.chdir(dic)

@@ -49,4 +49,12 @@ public class helper
     public static String getType(Table x) {
         return "table";
     }
+
+    public static String printArray(ArrayList x) {
+        String s = "";
+        for (int i = 0; i < x.size(); i++) {
+            s += ("'" + x.get(i) + "',");
+        }
+        return s;
+    }
 }
