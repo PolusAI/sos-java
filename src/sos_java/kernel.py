@@ -159,4 +159,9 @@ class sos_java:
                 #do scalar conversion
                 value = self.sos_kernel.get_response(f'System.out.println({name});', ('stream',))[0][1]['text']
                 result[name] = _java_scalar_to_sos(java_type, value)
+            elif java_type == 'table':
+                dic = tempfile.tempdir
+                os.chdir(dic)
+                self.sos_kernel.run_cell(f'{name}.write().csv("{dic}/java2df.csv");', True, False, on_error=f'Failed to write dataframe {name} to file')
+                result[name] = pd.read_csv(f'{dic}/java2df.csv')
         return result
