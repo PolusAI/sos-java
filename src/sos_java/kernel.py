@@ -62,19 +62,19 @@ def _sos_to_java_type(obj):
 
 def _java_scalar_to_sos(java_type, value):
     #Convert string value to appropriate type in SoS
-    integer_types = ['byte', 'int', 'short', 'long']
-    real_types = ['float', 'double']
+    integer_types = ['Byte', 'Integer', 'Short', 'Long']
+    real_types = ['Float', 'Double']
     if java_type in integer_types:
         return int(value)
     elif java_type in real_types:
         if value[-1] == 'f':
             value = value[:-1]
         return float(value)
-    elif java_type == 'char':
+    elif java_type == 'Character':
         return value
-    elif java_type == 'string':
+    elif java_type == 'String':
         return value
-    elif java_type == 'boolean':
+    elif java_type == 'Boolean':
         if value == 'true':
             return True
         else:
@@ -155,15 +155,22 @@ class sos_java:
             java_type = self.sos_kernel.get_response(f'helper.getType({name})', ('execute_result',))[0][1]['data']['text/plain']
             # self.sos_kernel.warn(java_type)
             
-            if java_type in ('boolean', 'char', 'byte', 'short', 'int', 'long', 'float', 'double', 'string'):
+            if java_type in ('Boolean', 'Character', 'Byte', 'Short', 'Integer', 'Long', 'Float', 'Double', 'String'):
                 #do scalar conversion
                 value = self.sos_kernel.get_response(f'System.out.println({name});', ('stream',))[0][1]['text']
                 result[name] = _java_scalar_to_sos(java_type, value)
-            elif java_type == 'array':
+            elif java_type == 'HashMap':
+                # value = '{' + self.insistent_get_response(f'for (auto it={name}.begin(); it!={name}.end(); ++it) std::cout << "\\"" << it->first << "\\":\\"" << it->second << "\\",";', ('stream',))[0][1]['text'] + '}'
+                value = self.sos_kernel.get_response(f'helper.printMap({name});', ('execute_result',))[0][1]['data']['text/plain']
+                temp_dict = dict(eval(value))
+                key_java_type = self.sos_kernel.get_response(f'helper.getMapKeyType({name})', ('execute_result',))[0][1]['data']['text/plain']
+                val_java_type = self.sos_kernel.get_response(f'helper.getMapValueType({name})', ('execute_result',))[0][1]['data']['text/plain']
+                result[name] = dict({_java_scalar_to_sos(key_java_type, key) : _java_scalar_to_sos(val_java_type, val) for (key, val) in temp_dict.items()})
+            elif java_type == 'ArrayList':
                 flat_list = '[' + self.sos_kernel.get_response(f'System.out.println(helper.printArray({name}))', ('stream',))[0][1]['text'] + ']'
                 el_type = self.insistent_get_response(f'helper.getType({name}.get(0))', ('execute_result',))[0][1]['data']['text/plain']
                 result[name] = np.array([_java_scalar_to_sos(el_type, el) for el in eval(flat_list)])
-            elif java_type == 'table':
+            elif java_type == 'Table':
                 dic = tempfile.tempdir
                 os.chdir(dic)
                 self.sos_kernel.run_cell(f'{name}.write().csv("{dic}/java2df.csv");', True, False, on_error=f'Failed to write dataframe {name} to file')
