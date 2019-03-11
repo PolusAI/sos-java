@@ -26,6 +26,7 @@ before_install:
   - unzip ijava-kernel.zip -d ijava-kernel
   - cd ijava-kernel
   - python install.py --sys-prefix
+  - cd ..
   #Pytest
   - pip install pytest pytest-cov nose
 env:
