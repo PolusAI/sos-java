@@ -23,7 +23,7 @@ before_install:
   - python -m sos_notebook.install
   #Java kernel
   - curl -L https://github.com/SpencerPark/IJava/releases/download/v1.2.0/ijava-1.2.0.zip > ijava-kernel.zip
-  - unzip ijava-kernel.zip -d ijava-kernel \
+  - unzip ijava-kernel.zip -d ijava-kernel
   - cd ijava-kernel
   - python install.py --sys-prefix
   #Pytest
