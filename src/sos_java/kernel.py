@@ -139,7 +139,6 @@ class sos_java:
 
     def get_vars(self, names):
         for name in names:
-            # self.sos_kernel.warn(name)
             java_repr = self._Java_declare_command_string(name, env.sos_dict[name])
             if not java_repr==None:
                 self.sos_kernel.run_cell(java_repr, True, False,
@@ -150,17 +149,13 @@ class sos_java:
     def put_vars(self, names, to_kernel=None):
         result = {}
         for name in names:
-            # name - string with variable name (in Java)
-            # self.sos_kernel.warn(name)
             java_type = self.sos_kernel.get_response(f'helper.getType({name})', ('execute_result',))[0][1]['data']['text/plain']
-            # self.sos_kernel.warn(java_type)
-            
+
             if java_type in ('Boolean', 'Character', 'Byte', 'Short', 'Integer', 'Long', 'Float', 'Double', 'String'):
                 #do scalar conversion
                 value = self.sos_kernel.get_response(f'System.out.println({name});', ('stream',))[0][1]['text']
                 result[name] = _java_scalar_to_sos(java_type, value)
             elif java_type == 'HashMap':
-                # value = '{' + self.insistent_get_response(f'for (auto it={name}.begin(); it!={name}.end(); ++it) std::cout << "\\"" << it->first << "\\":\\"" << it->second << "\\",";', ('stream',))[0][1]['text'] + '}'
                 value = self.sos_kernel.get_response(f'helper.printMap({name});', ('execute_result',))[0][1]['data']['text/plain']
                 temp_dict = dict(eval(value))
                 key_java_type = self.sos_kernel.get_response(f'helper.getMapKeyType({name})', ('execute_result',))[0][1]['data']['text/plain']
