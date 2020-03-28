@@ -31,7 +31,7 @@
     <dependency>
       <groupId>tech.tablesaw</groupId>
       <artifactId>tablesaw-parent</artifactId>
-      <version>0.31.0</version>
+      <version>0.37.3</version>
       <type>pom</type>
     </dependency>
     <dependency>
