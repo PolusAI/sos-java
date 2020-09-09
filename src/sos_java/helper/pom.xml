@@ -37,7 +37,7 @@
     <dependency>
       <groupId>tech.tablesaw</groupId>
       <artifactId>tablesaw-aggregate</artifactId>
-      <version>0.31.0</version>
+      <version>0.37.0</version>
     </dependency>
     <dependency>
       <groupId>tech.tablesaw</groupId>
@@ -47,7 +47,7 @@
     <dependency>
       <groupId>tech.tablesaw</groupId>
       <artifactId>tablesaw-jsplot</artifactId>
-      <version>0.31.0</version>
+      <version>0.37.0</version>
     </dependency>
   </dependencies>
 
